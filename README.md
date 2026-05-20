@@ -11,7 +11,7 @@ A financial report portal for wealth management firms. Advisors manage clients, 
 | Backend | FastAPI, SQLAlchemy 2, Pydantic v2, ReportLab |
 | Database | SQLite (dev) / PostgreSQL (production) |
 | Frontend | React 18, TypeScript, Vite, Tailwind CSS, Axios |
-| Deployment | Railway (backend) + Vercel (frontend) |
+| Deployment | Render (backend) + Vercel (frontend) |
 
 ---
 
@@ -143,18 +143,22 @@ The Vite dev server proxies `/api` requests to `http://localhost:8000`, so no fr
 
 ## Deployment
 
-### Backend → Railway
+### Backend → Render
 
-1. Create a new Railway project and connect your repository (or push from the CLI).
-2. Railway auto-detects Python via `requirements.txt`; the `Procfile` sets the start command.
-3. Add a **PostgreSQL** plugin — Railway injects `DATABASE_URL` automatically.
-4. Set the following environment variable in Railway:
+The `render.yaml` at the repo root defines the web service and a free PostgreSQL database as a blueprint — Render reads it automatically on first deploy.
+
+1. Push the repository to GitHub.
+2. In the Render dashboard, click **New → Blueprint** and connect the repository.
+3. Render will create the web service and database from `render.yaml`. `DATABASE_URL` is linked automatically.
+4. Once created, open the web service's **Environment** tab and set:
 
    ```
    ALLOWED_ORIGINS=https://your-app.vercel.app
    ```
 
-5. Deploy. The API will be available at your Railway-assigned URL.
+5. Click **Manual Deploy → Deploy latest commit**. The API will be live at your `.onrender.com` URL.
+
+> **Manual setup (no blueprint):** New → Web Service → connect repo → Root Directory: `backend` → Build: `pip install -r requirements.txt` → Start: `uvicorn main:app --host 0.0.0.0 --port $PORT`. Add a PostgreSQL database and link its `DATABASE_URL` to the service.
 
 ### Frontend → Vercel
 
@@ -163,7 +167,7 @@ The Vite dev server proxies `/api` requests to `http://localhost:8000`, so no fr
 3. Set the following environment variable in Vercel:
 
    ```
-   VITE_API_BASE_URL=https://your-backend.up.railway.app
+   VITE_API_BASE_URL=https://your-backend.onrender.com
    ```
 
 4. Deploy. `vercel.json` handles SPA routing so React Router deep links work correctly.
